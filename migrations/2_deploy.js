@@ -1,12 +1,8 @@
-const PlayBirdMansionToken = artifacts.require("PlayBirdMansionToken")
-const PlayBirdMansionMinter = artifacts.require("PlayBirdMansionMinter")
+const PlayBirdMansion = artifacts.require("PlayBirdMansion")
 
 module.exports = async function(deployer) {
-  await deployer.deploy(PlayBirdMansionToken)
-  const token = await PlayBirdMansionToken.deployed()
-
-  await deployer.deploy(PlayBirdMansionMinter, token.address)
-  const minter = await PlayBirdMansionMinter.deployed()
-
-  await token._transferOwnership(minter.address)
+  const name = "PlayBirdMansion"
+  const symbol = "PBM"
+  const MAX_BIRDS = 6969
+  await deployer.deploy(PlayBirdMansion, name, symbol, MAX_BIRDS)
 }

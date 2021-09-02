@@ -1,22 +1,25 @@
-const PlayBirdMansionToken = artifacts.require('./PlayBirdMansionToken')
-const PlayBirdMansionMinter = artifacts.require('./PlayBirdMansionMinter')
+const PlayBirdMansion = artifacts.require('./PlayBirdMansion')
 
 require('chai')
   .use(require('chai-as-promised'))
   .should()
 
-contract('PlayBirdMansionToken', ([deployer, user1, user2]) => {
+contract('PlayBirdMansion', ([deployer, user1, user2]) => {
   let token
+  let name = "PlayBirdMansion"
+  let symbol = "PBM"
+  let supply = 6969
+  let price = (10**16)*2
 
   beforeEach(async () => {
-    token = await PlayBirdMansionToken.new()
+    token = await PlayBirdMansion.new(name, symbol, supply)
   })
 
   describe('testing NFT contract', () => {
 
     describe('success', () => {
       it('checking NFT name', async () => {
-        expect(await token.name()).to.be.eq('Play Bird Mansion')
+        expect(await token.name()).to.be.eq('PlayBirdMansion')
       })
 
       it('checking NFT symbol', async () => {
@@ -26,16 +29,28 @@ contract('PlayBirdMansionToken', ([deployer, user1, user2]) => {
   })
 
   describe('minting tokens', () => {
-    let uri = "https://ipfs.io/ipfs/QmQEVVLJUR1WLN15S49rzDJsSP7za9DxeqpUzWuG4aondg"
 
     beforeEach(async () => {
-      await token.mint(user1, 1, uri, {from: deployer})
+      await token.flipSaleState({from: deployer})
+      await token.mintBird(3, {from: user1, value: price * 3})
     })
 
     describe('success', () => {
       it('has the correct uri for a token', async () => {
-        expect(await token.tokenURI(1)).to.be.eq(uri)
+        expect(await token.tokenURI(1)).to.be.eq("ipfs/1")
+        expect(await token.tokenURI(3)).to.be.eq("ipfs/3")
       })
+
+      it('has the correct owner for a minted token', async () => {
+        expect(await token.ownerOf(1)).to.be.eq(user1)
+      })
+
+      it('token count is updated properly', async () => {
+        await token.mintBird(2, {from: user2, value: price * 2})
+        expect(Number(await token.totalSupply())).to.be.eq(5)
+      })
+
+
     })
   })
 })
