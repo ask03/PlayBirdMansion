@@ -19,14 +19,14 @@ contract PlayBirdMansion is ERC721Enumerable, Ownable {
   }
 
   function _baseURI() internal view override returns (string memory) {
-      return "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
+      return "ipfs://QmPPWpqHwCUpgbVFP7JYRmNJh8YYWUpQVd9V6t7CA89oXs/";
   }
 
   function reserveBirds() public onlyOwner {
       uint supply = totalSupply();
       uint i;
       for (i = 0; i < 100; i++) {
-          _safeMint(msg.sender, supply + i);
+          _safeMint(msg.sender, supply + 1);
       }
   }
 

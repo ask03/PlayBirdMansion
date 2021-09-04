@@ -37,8 +37,8 @@ contract('PlayBirdMansion', ([deployer, user1, user2]) => {
 
     describe('success', () => {
       it('has the correct uri for a token', async () => {
-        expect(await token.tokenURI(1)).to.be.eq("ipfs/1")
-        expect(await token.tokenURI(3)).to.be.eq("ipfs/3")
+        expect(await token.tokenURI(1)).to.be.eq("ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/1")
+        expect(await token.tokenURI(3)).to.be.eq("ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/3")
       })
 
       it('has the correct owner for a minted token', async () => {
@@ -49,7 +49,6 @@ contract('PlayBirdMansion', ([deployer, user1, user2]) => {
         await token.mintBird(2, {from: user2, value: price * 2})
         expect(Number(await token.totalSupply())).to.be.eq(5)
       })
-
 
     })
   })
