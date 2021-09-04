@@ -3,10 +3,9 @@ require('@babel/register')
 require('@babel/core')
 require('dotenv').config()
 const HDWalletProvider = require("truffle-hdwallet-provider-privkey")
-const privKey = process.env.PRIVATE_KEY || ""
+const privKeys = process.env.PRIVATE_KEYS || ""
 
 module.exports = {
-
 
   networks: {
     development: {
@@ -15,22 +14,18 @@ module.exports = {
       network_id: '*'
     },
     rinkeby: {
+      networkCheckTimeout: 10000,
       provider: function () {
         return new HDWalletProvider(
-          privKey,
+          privKeys.split(','),
           `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`
         )
       },
       gas: 5000000,
-      gasPrice: 25000000000,
+      gasPrice: 5000000000,
       network_id: 4
     }
 
-  },
-
-  // Set default mocha options here, use special reporters etc.
-  mocha: {
-    // timeout: 100000
   },
 
   contracts_directory: './src/contracts/',
