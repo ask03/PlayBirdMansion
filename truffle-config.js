@@ -2,7 +2,7 @@ require('@babel/polyfill')
 require('@babel/register')
 require('@babel/core')
 require('dotenv').config()
-const HDWalletProvider = require("truffle-hdwallet-provider-privkey")
+const HDWalletProvider = require("@truffle/hdwallet-provider")
 const privKeys = process.env.PRIVATE_KEYS || ""
 
 module.exports = {
@@ -25,11 +25,11 @@ module.exports = {
       gasPrice: 5000000000,
       network_id: 4
     },
-    mumbai: {
+    matic: {
       provider: function () {
         return new HDWalletProvider(
           privKeys.split(','),
-          'https://rpc-mumbai.matic.today'
+          `${process.env.MUMBAI_API_KEY}`
         )
       },
       network_id: 80001,
