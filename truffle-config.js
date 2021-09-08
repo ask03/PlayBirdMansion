@@ -24,6 +24,18 @@ module.exports = {
       gas: 5000000,
       gasPrice: 5000000000,
       network_id: 4
+    },
+    mumbai: {
+      provider: function () {
+        return new HDWalletProvider(
+          privKeys.split(','),
+          'https://rpc-mumbai.matic.today'
+        )
+      },
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
     }
 
   },

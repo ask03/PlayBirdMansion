@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PlayBirdMansion is ERC721Enumerable, Ownable {
-  uint public constant maxBirdPurchase = 30;
+  uint public constant maxBirdPurchase = 69;
   uint256 public MAX_BIRDS;
   uint256 public birdPrice = 20000000000000000; // 0.02 ETH
   bool public saleActive = false;
@@ -24,8 +24,7 @@ contract PlayBirdMansion is ERC721Enumerable, Ownable {
 
   function reserveBirds() public onlyOwner {
       uint supply = totalSupply();
-      uint i;
-      for (i = 0; i < 100; i++) {
+      for (uint i = 0; i < 100; i++) {
           _safeMint(msg.sender, supply + 1);
       }
   }

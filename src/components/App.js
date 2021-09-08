@@ -49,23 +49,12 @@ class App extends Component {
 
     async connectWeb3(e) {
       e.preventDefault()
-      if(typeof window.ethereum != 'undefined') {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
         const account = accounts[0];
         this.setState({account: account})
-      } else {
-        window.alert("Please install MetaMask")
-      }
     }
 
-    async showConnectWeb3Button() {
-      if(window.ethereum) {
-        await window.ethereum.send('eth_requestAccounts')
-        return true
-      } else {
-        return false
-      }
-    }
+    
 
     constructor(props) {
       super(props)
@@ -111,7 +100,8 @@ class App extends Component {
                 </form>
               </div>
             <div>
-              { this.showConnectWeb3Button() ? "Web3 is Connected!" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
+              { this.state.account !== '' ? "Web3 is Connected!" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
+              <h6>Account: <span>{this.state.account}</span></h6>
           </div>
           </div>
         </main>
