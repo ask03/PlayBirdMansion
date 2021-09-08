@@ -2,7 +2,7 @@ require('@babel/polyfill')
 require('@babel/register')
 require('@babel/core')
 require('dotenv').config()
-const HDWalletProvider = require("truffle-hdwallet-provider-privkey")
+const HDWalletProvider = require("@truffle/hdwallet-provider")
 const privKeys = process.env.PRIVATE_KEYS || ""
 
 module.exports = {
