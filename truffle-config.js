@@ -14,7 +14,6 @@ module.exports = {
       network_id: '*'
     },
     rinkeby: {
-      networkCheckTimeout: 10000,
       provider: function () {
         return new HDWalletProvider(
           privKeys.split(','),

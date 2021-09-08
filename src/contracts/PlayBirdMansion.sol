@@ -8,6 +8,7 @@ contract PlayBirdMansion is ERC721Enumerable, Ownable {
   uint256 public MAX_BIRDS;
   uint256 public birdPrice = 20000000000000000; // 0.02 ETH
   bool public saleActive = false;
+  string public baseURI;
 
   constructor (string memory name, string memory symbol, uint256 maxSupply) ERC721(name, symbol) {
       MAX_BIRDS = maxSupply;
@@ -18,8 +19,12 @@ contract PlayBirdMansion is ERC721Enumerable, Ownable {
       payable(msg.sender).transfer(balance);
   }
 
+  function setURI(string newURI) public onlyOwner {
+      baseURI = newURI;
+  }
+
   function _baseURI() internal view override returns (string memory) {
-      return "ipfs://QmPPWpqHwCUpgbVFP7JYRmNJh8YYWUpQVd9V6t7CA89oXs/";
+      return baseURI;
   }
 
   function reserveBirds() public onlyOwner {
