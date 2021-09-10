@@ -1,14 +1,18 @@
 pragma solidity ^0.8.7;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./ContextMixin.sol";
 
-contract PlayBirdMansion is ERC721Enumerable, ContextMixin, Ownable {
+contract PlayBirdMansion is ERC721, ERC721Enumerable, ContextMixin, Ownable {
   uint public constant maxBirdPurchase = 69;
   uint256 public MAX_BIRDS;
-  uint256 public birdPrice = 20000000000000000; // 0.02 ETH
+  uint256 public birdPrice = 70 ether
   bool public saleActive = false;
+  address payable internal marketer;
+  address payable internal developer;
+  string public baseURI;
 
   constructor (string memory name, string memory symbol, uint256 maxSupply) ERC721(name, symbol) {
       MAX_BIRDS = maxSupply;
@@ -23,25 +27,8 @@ contract PlayBirdMansion is ERC721Enumerable, ContextMixin, Ownable {
       return string(abi.encodePacked("https://gateway.pinata.cloud/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/", toString(tokenId)));
   }
 
-  function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        uint256 index = digits - 1;
-        temp = value;
-        while (temp != 0) {
-            buffer[index--] = bytes1(uint8(48 + temp % 10));
-            temp /= 10;
-        }
-        return string(buffer);
-    }
+
+
 /**
  * Override isApprovedForAll to auto-approve OS's proxy contract
  */
@@ -94,5 +81,25 @@ contract PlayBirdMansion is ERC721Enumerable, ContextMixin, Ownable {
         }
       }
   }
+
+  function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        uint256 index = digits - 1;
+        temp = value;
+        while (temp != 0) {
+            buffer[index--] = bytes1(uint8(48 + temp % 10));
+            temp /= 10;
+        }
+        return string(buffer);
+    }
 
 }
