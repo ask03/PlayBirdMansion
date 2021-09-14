@@ -7,6 +7,23 @@ class App extends Component {
     async componentDidMount() {
       await this.loadBlockChainData()
       await this.checkReferralStatus()
+      await this.loadTokenData()
+      window.ethereum.on('accountsChanged', (accounts) => {
+        let currentAccount = this.state.account
+        if(accounts.length === 0) {
+          window.alert("Please connect to MetaMask")
+        } else if (accounts[0] !== currentAccount) {
+          currentAccount = accounts[0]
+          this.setState({account: currentAccount})
+        }
+        window.location.reload()
+      })
+      window.ethereum.on('chainChanged', (chainId) => {
+        window.location.reload()
+      })
+      window.ethereum.on('disconnect', (error) => {
+        window.ethereum.request({ method: 'eth_requestAccounts'})
+      })
     }
 
     async loadBlockChainData() {
@@ -41,6 +58,7 @@ class App extends Component {
       if(this.state.token !== 'undefined') {
         try {
           await this.state.token.methods.mintBird(numberOfBirds).send({ value: amount, from: this.state.account })
+          window.location.reload()
         } catch (e) {
           console.log('Error, mintBird: ', e)
         }
@@ -51,9 +69,18 @@ class App extends Component {
       if(this.state.token !== 'undefined') {
         try {
           await this.state.token.methods.mintBirdWithReferral(numberOfBirds, referralAddress).send({ value: amount, from: this.state.account})
+          window.location.reload()
         } catch (e) {
           console.log('Error, mintBirdWithReferral: ', e)
         }
+      }
+    }
+
+    async loadTokenData() {
+      if(this.state.token !== null) {
+        let tokens = await this.state.token.methods.totalSupply().call()
+        let tokensLeft =  6969 - tokens
+        this.setState({ tokensLeft: tokensLeft })
       }
     }
 
@@ -83,6 +110,10 @@ class App extends Component {
         account: '',
         token: null,
         balance: 0,
+        referralAddress: {
+          value: ''
+        },
+        tokensLeft: 0
       }
     }
 
@@ -104,20 +135,14 @@ class App extends Component {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
                     let total = amount * 75// convert to wei
-                    let referralTransaction
-                    let mintTransaction
 
                     if(this.referralAddress.value !== '') {
                       total = total - (5*amount)
                       total = total * (10**18)
-                      referralTransaction = this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
-                      console.log(referralTransaction)
-                      this.setState({referralTransaction: referralTransaction})
+                      this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
                     } else {
                       total = total * (10**18)
-                      mintTransaction = this.mintBirds(amount, total)
-                      console.log(mintTransaction)
-                      this.setState({mintTransaction: mintTransaction})
+                      this.mintBirds(amount, total)
                     }
 
 
@@ -141,7 +166,7 @@ class App extends Component {
                         maxLength='42'
                         minLength='42'
                         className="form-control form-control-md"
-                        placeholder="Referral Address 0x..."
+                        placeholder="(Optional) referral address 0x..."
                         ref={(input) => { this.referralAddress = input }}
                       />
                     }
@@ -155,8 +180,12 @@ class App extends Component {
               { this.state.account !== '' ? "Web3 is Connected" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
 
               <br></br>
-              <h6>Account:</h6>
+              Account:
               <h6><span>{this.state.account}</span></h6>
+              <br></br>
+              <br></br>
+              <br></br>
+              <h3>{(this.state.tokensLeft).toString()}/6969 Birds Remaining</h3>
             </div>
           </div>
         </main>
