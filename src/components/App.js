@@ -6,6 +6,7 @@ class App extends Component {
 
     async componentDidMount() {
       await this.loadBlockChainData()
+      await this.checkReferralStatus()
     }
 
     async loadBlockChainData() {
@@ -18,7 +19,7 @@ class App extends Component {
           const balance = await web3.eth.getBalance(accounts[0])
           this.setState({ account: accounts[0], balance: balance, web3: web3 })
         } else {
-          window.alert('Please login with MetaMask')
+          window.alert('Please connect your MetaMask account')
         }
 
         try {
@@ -26,7 +27,7 @@ class App extends Component {
           this.setState({ token: token })
         } catch(e) {
           console.log('Error', e)
-          window.alert('Contracts not deployed to current network')
+          window.alert('Please connect to Polygon Network')
         }
 
 
@@ -46,6 +47,26 @@ class App extends Component {
       }
     }
 
+    async mintBirdsWithReferral(numberOfBirds, amount, referralAddress) {
+      if(this.state.token !== 'undefined') {
+        try {
+          await this.state.token.methods.mintBirdWithReferral(numberOfBirds, referralAddress).send({ value: amount, from: this.state.account})
+        } catch (e) {
+          console.log('Error, mintBirdWithReferral: ', e)
+        }
+      }
+    }
+
+    async checkReferralStatus() {
+      let result = false
+      if(this.state.token !== null) {
+        if(this.state.account !== '') {
+          result = await this.state.token.methods.alreadyReferred(this.state.account).call()
+          this.setState({ referStatus: result })
+        }
+      }
+      return result
+    }
 
     async connectWeb3(e) {
       e.preventDefault()
@@ -54,7 +75,6 @@ class App extends Component {
         this.setState({account: account})
     }
 
-    
 
     constructor(props) {
       super(props)
@@ -73,17 +93,34 @@ class App extends Component {
           <div className="content mr-auto ml-auto">
               <div>
                   <br></br>
-                  How many birds to mint?
+                  (each bird will cost 75 MATIC (Polygon) + gas fees)
                   <br></br>
-                  (each bird costs 0.02 ETH + gas fees)
+                  (can mint up to 20 birds per time)
                   <br></br>
-                  (can mint upto 69 birds per account)
+                  (use a referral for a 5 MATIC discount per bird!)
                   <br></br>
+                  (referral can only be used once)
                   <form onSubmit={(e) => {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
-                    let total = amount * 10**16*2// convert to wei
-                    this.mintBirds(amount, total)
+                    let total = amount * 75// convert to wei
+                    let referralTransaction
+                    let mintTransaction
+
+                    if(this.referralAddress.value !== '') {
+                      total = total - (5*amount)
+                      total = total * (10**18)
+                      referralTransaction = this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
+                      console.log(referralTransaction)
+                      this.setState({referralTransaction: referralTransaction})
+                    } else {
+                      total = total * (10**18)
+                      mintTransaction = this.mintBirds(amount, total)
+                      console.log(mintTransaction)
+                      this.setState({mintTransaction: mintTransaction})
+                    }
+
+
                   }}>
                   <div className='form-group mr-sm-2'>
                   <br></br>
@@ -91,20 +128,39 @@ class App extends Component {
                       id='numBirds'
                       step='1'
                       type='number'
+                      max='20'
                       className="form-control form-control-md"
-                      placeholder="amount..."
+                      placeholder="How many birds to mint?"
                       ref={(input) => { this.amountOfBirds = input }}
                     />
+                  <br></br>
+
+                    { this.state.referStatus ? "" :
+                      <input
+                        id='referral'
+                        maxLength='42'
+                        minLength='42'
+                        className="form-control form-control-md"
+                        placeholder="Referral Address 0x..."
+                        ref={(input) => { this.referralAddress = input }}
+                      />
+                    }
                   </div>
+                  <br></br>
                   <button type='submit' className='btn btn-primary'>MINT</button>
                 </form>
               </div>
             <div>
-              { this.state.account !== '' ? "Web3 is Connected!" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
-              <h6>Account: <span>{this.state.account}</span></h6>
-          </div>
+              <br></br>
+              { this.state.account !== '' ? "Web3 is Connected" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
+
+              <br></br>
+              <h6>Account:</h6>
+              <h6><span>{this.state.account}</span></h6>
+            </div>
           </div>
         </main>
+
     );
   }
 

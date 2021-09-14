@@ -1,74 +1,150 @@
-pragma solidity ^0.8.7;
+  pragma solidity ^0.8.7;
 
-/* import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; */
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./ContextMixin.sol";
+  import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+  import "@openzeppelin/contracts/access/Ownable.sol";
+  import "@openzeppelin/contracts/utils/Address.sol";
+  import "./ContextMixin.sol";
 
-contract PlayBirdMansion is ERC721Enumerable, ContextMixin, Ownable {
-  uint256 public constant maxBirdPurchase = 69;
+  contract PlayBirdMansion is ERC721Enumerable, ContextMixin, Ownable {
 
-  uint256 public MAX_BIRDS = 30;
+    using Address for address;
 
-  uint256 public birdPrice = 0.02 ether;
+    uint256 public constant MAX_BIRDS = 6969;
 
-  bool public saleActive = false;
+    uint256 public constant maxBirdPurchase = 20;
 
-  address payable internal marketer;
+    uint256 private birdPrice = 75 ether;
 
-  address payable internal developer;
+    uint256 private referralDiscount = 5 ether;
 
-  string public baseURI;
+    bool public saleActive = false;
 
-  constructor (address payable _marketer, address payable _developer) ERC721("Play Bird Mansion", "PBM") {
-      marketer = _marketer;
-      developer = _developer;
-      reserveBirds(69);
-  }
+    address payable internal artist;
 
-  function withdraw() public onlyOwner {
-      uint256 balance = address(this).balance;
-      require(balance > 0, "Contract balance is at 0");
+    address payable internal developer;
 
-      uint256 transferAmount = balance / 2;
-      marketer.transfer(transferAmount);
-      developer.transfer(transferAmount);
-  }
+    address payable internal marketer;
 
-  function setBaseURI(string memory newURI) public onlyOwner{
-      baseURI = newURI;
-  }
+    string internal baseURI;
 
-  function _baseURI() internal view override returns (string memory) {
-      return baseURI;
-  }
+    mapping(address => bool) public alreadyReferred;  // user has used referral
+    mapping(address => bool) public referrableAddress;
+    mapping(address => bool) public referredToBefore;
+    mapping(address => uint256) public numReferrals;  // number of referrals an address has (used for contest)
 
-  function reserveBirds(uint256 amount) public onlyOwner {
-      require(totalSupply() + amount <= MAX_BIRDS, "Reservation would exceed max supply");
+    address[] private referredAddresses; // used for calculations in referral contest
 
-      for (uint i = 0; i < amount; i++) {
-          uint256 index = totalSupply() + 1;
-          _safeMint(msg.sender, index);
-      }
-  }
+    bool private reentrancyLock = false;
 
-  function flipSaleState() public onlyOwner {
-      saleActive = !saleActive;
-  }
-
-  function mintBird(uint numberOfBirds) public payable {
-      require(saleActive, "Sale is not active");
-      require(numberOfBirds <= maxBirdPurchase, "Can only mint 69 birds at a time");
-      require(totalSupply() + numberOfBirds <= MAX_BIRDS, "Purchase would exceed max supply of Birds");
-      require(birdPrice * numberOfBirds <= msg.value, "Ether value sent is incorrect");
-
-      for(uint i = 0; i < numberOfBirds; i++) {
-        uint256 index = totalSupply() + 1;
-        if (totalSupply() < MAX_BIRDS) {
-            _safeMint(msg.sender, index);
+    modifier reentrancyGuard {
+        if (reentrancyLock) {
+            revert();
         }
-      }
-  }
+        reentrancyLock = true;
+        _;
+        reentrancyLock = false;
+    }
+
+    constructor (address payable _artist, address payable _developer, address payable _marketer) ERC721("Play Bird Mansion", "PBM") {
+        artist = _artist;
+        developer = _developer;
+        marketer = _marketer;
+    }
+
+
+    function withdraw() public onlyOwner reentrancyGuard{
+        uint256 balance = address(this).balance;
+        require(balance > 0, "Contract balance is at 0");
+
+        uint256 marketerTransfer = balance / 10;
+        marketer.transfer(marketerTransfer);
+        balance = balance - marketerTransfer;
+
+        uint256 transferAmount = balance / 2;
+        artist.transfer(transferAmount);
+        developer.transfer(transferAmount);
+    }
+
+    function setBaseURI(string memory newURI) external onlyOwner{
+        baseURI = newURI;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
+    function reserveBirds(uint256 amount) external onlyOwner reentrancyGuard {
+        require(totalSupply() + amount <= MAX_BIRDS, "Reservation would exceed max supply");
+        require(amount <= maxBirdPurchase, "can only reserve maximum 20 per time");
+
+        for (uint i = 0; i < amount; i++) {
+            uint256 index = totalSupply();
+            _safeMint(msg.sender, index + 1);
+        }
+    }
+
+    function flipSaleState() external onlyOwner {
+        saleActive = !saleActive;
+    }
+
+    function mintBird(uint numberOfBirds) external payable reentrancyGuard {
+        require(saleActive, "Sale is not active");
+        require(numberOfBirds <= maxBirdPurchase, "Can only mint 20 birds at a time");
+        require(totalSupply() + numberOfBirds <= MAX_BIRDS, "Purchase would exceed max supply of Birds");
+        require(birdPrice * numberOfBirds <= msg.value, "Matic value sent is incorrect");
+
+        referrableAddress[msg.sender] = true;
+
+        for(uint i = 0; i < numberOfBirds; i++) {
+            uint256 index = totalSupply();
+            _safeMint(msg.sender, index + 1);
+        }
+
+    }
+
+    function mintBirdWithReferral(uint numberOfBirds, address referral) external payable reentrancyGuard {
+        require(saleActive, "Sale is not active");
+        require(numberOfBirds <= maxBirdPurchase, "Can only mint 20 birds at a time");
+        require(totalSupply() + numberOfBirds <= MAX_BIRDS, "Purchase would exceed max supply of Birds");
+        require(validReferral(referral), "Referral is not valid: ");
+
+        uint256 price = birdPrice - referralDiscount;
+        require(price * numberOfBirds <= msg.value, "Ether value sent is incorrect");
+
+        if(!referredToBefore[referral]) {
+          referredToBefore[referral] = true;
+          referrableAddress[referral] = true;
+          referredAddresses.push(referral);
+        }
+
+        alreadyReferred[msg.sender] = true;
+        numReferrals[referral] = numReferrals[referral] + 1;
+
+        for(uint i = 0; i < numberOfBirds; i++) {
+          uint256 index = totalSupply();
+          _safeMint(msg.sender, index + 1);
+        }
+
+
+    }
+
+    function validReferral(address referral) private view returns (bool) {
+        require(validAddress(referral), "Referral address is not a valid wallet address");
+        require(referral != msg.sender, "Cannot refer self");
+        require(!(alreadyReferred[msg.sender]), "User has already used referral");
+        require(balanceOf(referral) > 0 || referrableAddress[referral], "Referral address never purchased a token, or isnt a current owner");
+        return true;
+    }
+
+    function validAddress(address referral) private view returns (bool) {
+        if(!(referral.isContract())
+            && (referral != address(0))
+          ){
+              return true;
+          }
+
+        return false;
+    }
 
     /**
      * This is used instead of msg.sender as transactions won't be sent by the original token owner, but by OpenSea.
@@ -98,12 +174,14 @@ contract PlayBirdMansion is ERC721Enumerable, ContextMixin, Ownable {
         return ERC721.isApprovedForAll(_owner, _operator);
     }
 
-    function returnMarketer() public view returns(address) {
-        return marketer;
+    function getReferredAddressesLength() external view onlyOwner returns(uint256) {
+        uint256 length = referredAddresses.length;
+        return length;
     }
 
-    function returnDeveloper() public view returns(address) {
-        return developer;
+    function getReferredAddresses() external view onlyOwner returns (address[] memory) {
+        address[] storage addresses = referredAddresses;
+        return addresses;
     }
 
-}
+  }

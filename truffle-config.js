@@ -29,10 +29,10 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(
           privKeys.split(','),
-          `${process.env.MUMBAI_API_KEY}`
+          `${process.env.MATIC_API_KEY}`
         )
       },
-      network_id: 80001,
+      network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true
