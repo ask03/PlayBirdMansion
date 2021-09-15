@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/components/App.css"],"names":[],"mappings":"AACA,KACI,eACJ","file":"main.9f8d478b.chunk.css","sourcesContent":["/* Styles go here */\r\nbody{\r\n    background: black;\r\n}\r\n"]}

@@ -119,6 +119,7 @@ class App extends Component {
 
     render() {
       return (
+      
 
         <main role="main" className="col-lg-12 d-flex justify-content-center text-white ">
           <div className="content mr-auto ml-auto">
