@@ -13,7 +13,7 @@
 
     uint256 public constant maxBirdPurchase = 20;
 
-    uint256 private birdPrice = 75 ether;
+    uint256 private birdPrice = 35 ether;
 
     uint256 private referralDiscount = 5 ether;
 
@@ -144,6 +144,14 @@
           }
 
         return false;
+    }
+
+    function updatePrice(uint256 newPrice) public onlyOwner {
+        birdPrice = newPrice;
+    }
+
+    function updateDiscount(uint256 newDc) public onlyOwner {
+        referralDiscount = newDc;
     }
 
     /**
