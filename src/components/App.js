@@ -119,7 +119,7 @@ class App extends Component {
 
     render() {
       return (
-      
+
 
         <main role="main" className="col-lg-12 d-flex justify-content-center text-white ">
           <div className="content mr-auto ml-auto">
@@ -135,7 +135,7 @@ class App extends Component {
                   <form onSubmit={(e) => {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
-                    let total = amount * 75// convert to wei
+                    let total = amount * 35// convert to wei
 
                     if(this.referralAddress.value !== '') {
                       total = total - (5*amount)
