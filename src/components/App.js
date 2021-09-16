@@ -125,7 +125,7 @@ class App extends Component {
           <div className="content mr-auto ml-auto">
               <div>
                   <br></br>
-                  (each bird will cost 75 MATIC (Polygon) + gas fees)
+                  (each bird will cost 35 MATIC (Polygon) + gas fees)
                   <br></br>
                   (can mint up to 20 birds per time)
                   <br></br>
