@@ -19,6 +19,9 @@ class App extends Component {
         window.location.reload()
       })
       window.ethereum.on('chainChanged', (chainId) => {
+        if(chainId === '0x89') {
+          this.setState({connection : true})
+        }
         window.location.reload()
       })
       window.ethereum.on('disconnect', (error) => {
@@ -42,9 +45,10 @@ class App extends Component {
         try {
           const token = new web3.eth.Contract(PlayBirdMansion.abi, PlayBirdMansion.networks[netId].address)
           this.setState({ token: token })
+          this.setState({ connection: true })
         } catch(e) {
           console.log('Error', e)
-          window.alert('Please connect to Polygon Network')
+          window.alert('Please connect MetaMask to Polygon Network')
         }
 
 
@@ -113,7 +117,8 @@ class App extends Component {
         referralAddress: {
           value: ''
         },
-        tokensLeft: 0
+        tokensLeft: 0,
+        connection: false
       }
     }
 
@@ -125,13 +130,11 @@ class App extends Component {
           <div className="content mr-auto ml-auto">
               <div>
                   <br></br>
-                  (each bird will cost 35 MATIC (Polygon) + gas fees)
+                  (each bird will cost 35 Matics (Polygon Network))
                   <br></br>
-                  (can mint up to 20 birds per time)
+                  (can mint up to 20 birds)
                   <br></br>
-                  (use a referral for a 5 MATIC discount per bird!)
-                  <br></br>
-                  (referral can only be used once)
+                  (use a referral for a 5 MATIC discount per mint)
                   <form onSubmit={(e) => {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
@@ -178,7 +181,7 @@ class App extends Component {
               </div>
             <div>
               <br></br>
-              { this.state.account !== '' ? "Web3 is Connected" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
+              { this.state.account !== '' ? "Web3 Connected" : <button type='submit' className='btn btn-primary' onClick={(e) => this.connectWeb3(e)}>Connect Web3</button> }
 
               <br></br>
               Account:
@@ -186,7 +189,7 @@ class App extends Component {
               <br></br>
               <br></br>
               <br></br>
-              <h3>{(this.state.tokensLeft).toString()}/6969 Birds Remaining</h3>
+              {this.state.connection ? <h3>{(this.state.tokensLeft).toString()}/6969 Birds Remaining</h3> : <h3>Please connect MetaMask to Polygon Network</h3> }
             </div>
           </div>
         </main>
