@@ -21,6 +21,7 @@ class App extends Component {
       window.ethereum.on('chainChanged', (chainId) => {
         if(chainId === '0x89') {
           this.setState({connection : true})
+          this.loadTokenData()
         }
         window.location.reload()
       })
@@ -46,6 +47,7 @@ class App extends Component {
           const token = new web3.eth.Contract(PlayBirdMansion.abi, PlayBirdMansion.networks[netId].address)
           this.setState({ token: token })
           this.setState({ connection: true })
+          this.loadTokenData()
         } catch(e) {
           console.log('Error', e)
           window.alert('Please connect MetaMask to Polygon Network')
@@ -130,18 +132,18 @@ class App extends Component {
           <div className="content mr-auto ml-auto">
               <div>
                   <br></br>
-                  (each bird will cost 35 Matics (Polygon Network))
+                  (minting a bird will cost 20 Matics (Polygon Network))
                   <br></br>
-                  (can mint up to 20 birds)
+                  (can mint up to 20 birds per transaction)
                   <br></br>
-                  (use a referral for a 5 MATIC discount per mint)
+                  (use a referral for a 2 MATIC discount per mint)
                   <form onSubmit={(e) => {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
-                    let total = amount * 35// convert to wei
+                    let total = amount * 20// convert to wei
 
                     if(this.referralAddress.value !== '') {
-                      total = total - (5*amount)
+                      total = total - (2*amount)
                       total = total * (10**18)
                       this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
                     } else {
