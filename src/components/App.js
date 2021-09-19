@@ -21,7 +21,6 @@ class App extends Component {
       window.ethereum.on('chainChanged', (chainId) => {
         if(chainId === '0x89') {
           this.setState({connection : true})
-          this.loadTokenData()
         }
         window.location.reload()
       })
@@ -47,7 +46,7 @@ class App extends Component {
           const token = new web3.eth.Contract(PlayBirdMansion.abi, PlayBirdMansion.networks[netId].address)
           this.setState({ token: token })
           this.setState({ connection: true })
-          this.loadTokenData()
+          await this.loadTokenData()
         } catch(e) {
           console.log('Error', e)
           window.alert('Please connect MetaMask to Polygon Network')
