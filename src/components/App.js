@@ -136,15 +136,31 @@ class App extends Component {
                   (can mint up to 20 birds per transaction)
                   <br></br>
                   (use a referral for a 2 MATIC discount per mint)
-                  <form onSubmit={(e) => {
+                  <form onSubmit={async(e) => {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
                     let total = amount * 20// convert to wei
 
                     if(this.referralAddress.value !== '') {
-                      total = total - (2*amount)
-                      total = total * (10**18)
-                      this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
+                      if(this.referralAddress.value === this.state.account) {
+                          window.alert("Cannot refer self")
+                      } else if (this.referralAddress.value === '0x0000000000000000000000000000000000000000') {
+                          window.alert("Cannot be zero address")
+                      } else {
+                          let result = await this.state.token.methods.referrableAddress(this.referralAddress.value).call()
+                          console.log(result)
+                          if (result === true) {
+                            total = total - (2*amount)
+                            total = total * (10**18)
+                            this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
+                          } else {
+                            window.alert("invalid referral address")
+                          }
+
+                      }
+
+                      this.referralAddress.value = ''
+
                     } else {
                       total = total * (10**18)
                       this.mintBirds(amount, total)

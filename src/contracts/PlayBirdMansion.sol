@@ -13,9 +13,9 @@
 
     uint256 public constant maxBirdPurchase = 20;
 
-    uint256 private birdPrice = 35 ether;
+    uint256 private birdPrice = 20 ether;
 
-    uint256 private referralDiscount = 5 ether;
+    uint256 private referralDiscount = 2 ether;
 
     bool public saleActive = false;
 
