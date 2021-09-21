@@ -148,8 +148,8 @@ class App extends Component {
                           window.alert("Cannot be zero address")
                       } else {
                           let result = await this.state.token.methods.referrableAddress(this.referralAddress.value).call()
-                          console.log(result)
-                          if (result === true) {
+                          let resultTwo = await this.state.token.methods.balanceOf(this.referralAddress.value).call()
+                          if (result === true || resultTwo > 0) {
                             total = total - (2*amount)
                             total = total * (10**18)
                             this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
