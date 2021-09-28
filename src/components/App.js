@@ -131,15 +131,15 @@ class App extends Component {
           <div className="content mr-auto ml-auto">
               <div>
                   <br></br>
-                  (minting a bird will cost 20 Matics (Polygon Network))
+                  (minting a bird will cost 30 Matics (Polygon Network))
                   <br></br>
                   (can mint up to 20 birds per transaction)
                   <br></br>
-                  (use a referral for a 2 MATIC discount per mint)
+                  (use a referral for a 4 MATIC discount per mint)
                   <form onSubmit={async(e) => {
                     e.preventDefault()
                     let amount = this.amountOfBirds.value
-                    let total = amount * 20// convert to wei
+                    let total = amount * 30// convert to wei
 
                     if(this.referralAddress.value !== '') {
                       if(this.referralAddress.value === this.state.account) {
@@ -150,7 +150,7 @@ class App extends Component {
                           let result = await this.state.token.methods.referrableAddress(this.referralAddress.value).call()
                           let resultTwo = await this.state.token.methods.balanceOf(this.referralAddress.value).call()
                           if (result === true || resultTwo > 0) {
-                            total = total - (2*amount)
+                            total = total - (4*amount)
                             total = total * (10**18)
                             this.mintBirdsWithReferral(amount, total, this.referralAddress.value)
                           } else {
